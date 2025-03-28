@@ -1,27 +1,90 @@
 # VBA---Filtering-and-Comparing-
-1. Automated Filtering and File Comparison Tasks:
-Today's Event Details File Comparison:
 
-User provided an Event Details file and a Verified List.
-The task involved filtering the Event Details file based on specific column values (Column AT = Yes, Column V = None, and Column Y = 2024).
-The code compared Column A in the Event Details file to the Verified List, identifying any new records and copying them into a new file, named "New FC PO Issued, Scope None - Today's date".
+**EV NEX**
 
-EV NEX Discrepancy File Comparison:
+*The VBA code is a macro designed to compare two Excel files containing EV NEX discrepancy data. It filters records based on specific criteria and outputs discrepancies into a new workbook. Here's a summary of its functionality:*
 
-User provided the "Latest EV NEX Discrepancy" file and the "Previous Week's EV NEX Discrepancy" file.
-For both files, filters were applied based on specific criteria (Column G = MENA, Column AA > 0, and Column AQ = False).
-The code compared both files for new records in two key scenarios:
-Probability: Comparing Column AQ in both files. If new records were found in the latest file, those rows were copied to a new sheet named Probability.
-Ownership: Comparing Column BJ in both files. New records were copied into a new sheet named Ownership.
-If no new records were found, appropriate messages ("No new Probability" or "No new Ownership") were displayed.
+ 
 
-2. Outcome Handling:
-File Creation: In cases where new records were found (Probability or Ownership), a new file was generated with the relevant records, named EV NEX Defects.xlsx.
-Conditional File Saving: If no new records were found, the output file was either not created or closed without saving.
-User Notifications: The user was notified with messages like "Probability ready", "Ownership ready", "No new Probability", or "No new Ownership" based on the outcome.
+### Function Overview:
 
-3. Workflow Automation:
-User Prompts: The VBA code prompted the user to upload the necessary files and handled file and sheet management based on their inputs.
-Data Filtering: It filtered the files based on criteria and then performed comparisons between the two sets of data.
-Efficient Record Handling: The new records were copied to a new file or sheet, maintaining the header and the required data.
-These tasks streamline the process of comparing EV NEX discrepancy files and extracting new relevant records, saving significant manual work in the process.
+1. **File Selection**: Prompts the user to open the latest and previous EV NEX discrepancy files.
+
+2. **Data Filtering**: Applies filters to the worksheets to select records based on specific criteria:
+
+   - Column G ("MENA")
+
+   - Column AA (greater than 0)
+
+   - Column AQ ("False")
+
+3. **Output Workbook Creation**: Creates a new workbook to store discrepancies found.
+
+4. **Comparison Logic**:
+
+   - Compares rows in the latest worksheet to those in the previous worksheet.
+
+   - If a row from the latest worksheet does not have a matching entry in the previous worksheet based on Column A, it is considered a discrepancy.
+
+   - The code handles "Probability" and "Ownership" discrepancies separately.
+
+5. **Output and Notification**: Copies headers and relevant rows into corresponding sheets ("Probability" and "Ownership") in the new workbook and notifies the user of the results.
+
+6. **File Saving**: Saves the new workbook if discrepancies are found.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**FC PO**
+
+The provided VBA code is a macro designed for Microsoft Excel that performs the following tasks:
+
+ 
+
+1. **Prompt for File Selection**: It prompts the user to open two Excel files: "Today's Event Details" and "Verified List". These files are assumed to have data in the first worksheet.
+
+ 
+
+2. **Filter and Compare**: It filters rows in the "Event Details" file based on specific conditions:
+
+   - Column AT must contain "Yes".
+
+   - Column V must contain "None".
+
+   - The year in Column Y must be 2024.
+
+  
+
+   It then checks if the value in Column A of these filtered rows exists in the "Verified List".
+
+ 
+
+3. **Generate a New File**: If a row from "Event Details" does not have its Column A value in the "Verified List", it copies the entire row to a new worksheet in a newly created workbook. The header from "Event Details" is copied to the new worksheet.
+
+ 
+
+4. **Save the New File**: The new workbook is saved in the default file path with a name that includes today's date.
+
+ 
+
+5. **Notification and Cleanup**: It notifies the user once the new file is created and optionally closes the original workbooks without saving changes.
+
+ 
+
+ 
+
+ 
+
+ 
