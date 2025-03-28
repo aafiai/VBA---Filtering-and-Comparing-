@@ -1,0 +1,297 @@
+Sub CompareEVNEXDiscrepancyFiles()
+
+    Dim latestFileWB As Workbook
+
+    Dim previousFileWB As Workbook
+
+    Dim outputWB As Workbook
+
+    Dim latestWS As Worksheet
+
+    Dim previousWS As Worksheet
+
+    Dim outputWSProbability As Worksheet
+
+    Dim outputWSOwnership As Worksheet
+
+    Dim lastRowLatest As Long
+
+    Dim lastRowPrevious As Long
+
+    Dim lastRowOutput As Long
+
+    Dim i As Long, j As Long
+
+    Dim foundMatch As Boolean
+
+    Dim hasProbabilityRecords As Boolean
+
+    Dim hasOwnershipRecords As Boolean
+
+    Dim outputFilePath As String
+
+   
+
+    ' Ask for the latest file
+
+    MsgBox "Please provide the latest EV NEX Discrepancy file.", vbInformation
+
+    Application.Dialogs(xlDialogOpen).Show
+
+    Set latestFileWB = ActiveWorkbook
+
+    Set latestWS = latestFileWB.Sheets(1) ' Assuming data is in the first sheet
+
+   
+
+    ' Ask for the previous file
+
+    MsgBox "Please provide the previous week's EV NEX Discrepancy file.", vbInformation
+
+    Application.Dialogs(xlDialogOpen).Show
+
+    Set previousFileWB = ActiveWorkbook
+
+    Set previousWS = previousFileWB.Sheets(1) ' Assuming data is in the first sheet
+
+   
+
+    ' Get last rows
+
+    lastRowLatest = latestWS.Cells(latestWS.Rows.Count, "A").End(xlUp).Row
+
+    lastRowPrevious = previousWS.Cells(previousWS.Rows.Count, "A").End(xlUp).Row
+
+   
+
+    ' Filter both files: Column G = MENA, Column AA > 0, Column AQ = False
+
+    latestWS.Range("A1").AutoFilter Field:=7, Criteria1:="MENA" ' Column G
+
+    latestWS.Range("A1").AutoFilter Field:=27, Criteria1:=">0" ' Column AA
+
+    latestWS.Range("A1").AutoFilter Field:=43, Criteria1:="False" ' Column AQ
+
+ 
+
+    previousWS.Range("A1").AutoFilter Field:=7, Criteria1:="MENA" ' Column G
+
+    previousWS.Range("A1").AutoFilter Field:=27, Criteria1:=">0" ' Column AA
+
+    previousWS.Range("A1").AutoFilter Field:=43, Criteria1:="False" ' Column AQ
+
+   
+
+    ' Initialize output variables
+
+    hasProbabilityRecords = False
+
+    hasOwnershipRecords = False
+
+    outputFilePath = Application.DefaultFilePath & "\EV NEX Defects.xlsx"
+
+   
+
+    ' Create output workbook if needed
+
+    Set outputWB = Workbooks.Add
+
+   
+
+    ' Probability comparison
+
+    Set outputWSProbability = outputWB.Sheets(1)
+
+    outputWSProbability.Name = "Probability"
+
+    lastRowOutput = 1 ' Start from the first row in the output sheet
+
+   
+
+    ' Compare latest with previous for Probability
+
+    For i = 2 To lastRowLatest
+
+        If latestWS.Cells(i, "AQ").Value = "False" Then
+
+            foundMatch = False
+
+            For j = 2 To lastRowPrevious
+
+                If previousWS.Cells(j, "A").Value = latestWS.Cells(i, "A").Value Then
+
+                    foundMatch = True
+
+                    Exit For
+
+                End If
+
+            Next j
+
+           
+
+            If Not foundMatch Then
+
+                If Not hasProbabilityRecords Then
+
+                    ' Copy headers
+
+                    latestWS.Rows(1).Copy Destination:=outputWSProbability.Rows(1)
+
+                    lastRowOutput = 2
+
+                End If
+
+                ' Copy the row
+
+                latestWS.Rows(i).Copy Destination:=outputWSProbability.Rows(lastRowOutput)
+
+                lastRowOutput = lastRowOutput + 1
+
+                hasProbabilityRecords = True
+
+            End If
+
+        End If
+
+    Next i
+
+   
+
+    ' Notify user about Probability
+
+    If hasProbabilityRecords Then
+
+        MsgBox "Probability ready", vbInformation
+
+    Else
+
+        MsgBox "No new Probability", vbInformation
+
+    End If
+
+   
+
+    ' Remove filter from Column AQ
+
+    latestWS.AutoFilterMode = False
+
+    previousWS.AutoFilterMode = False
+
+   
+
+    ' Filter both files: Column BJ = False
+
+    latestWS.Range("A1").AutoFilter Field:=62, Criteria1:="False" ' Column BJ
+
+    previousWS.Range("A1").AutoFilter Field:=62, Criteria1:="False" ' Column BJ
+
+   
+
+    ' Ownership comparison
+
+    If Not hasProbabilityRecords Then
+
+        ' If no Probability records were found, create the file
+
+        outputWB.Worksheets.Add.Name = "Ownership"
+
+        Set outputWSOwnership = outputWB.Worksheets("Ownership")
+
+    Else
+
+        Set outputWSOwnership = outputWB.Sheets.Add
+
+        outputWSOwnership.Name = "Ownership"
+
+    End If
+
+    lastRowOutput = 1 ' Start from the first row in Ownership sheet
+
+   
+
+    For i = 2 To lastRowLatest
+
+        If latestWS.Cells(i, "BJ").Value = "False" Then
+
+            foundMatch = False
+
+            For j = 2 To lastRowPrevious
+
+                If previousWS.Cells(j, "A").Value = latestWS.Cells(i, "A").Value Then
+
+                    foundMatch = True
+
+                    Exit For
+
+                End If
+
+            Next j
+
+           
+
+            If Not foundMatch Then
+
+                If Not hasOwnershipRecords Then
+
+                    ' Copy headers
+
+                    latestWS.Rows(1).Copy Destination:=outputWSOwnership.Rows(1)
+
+                    lastRowOutput = 2
+
+                End If
+
+                ' Copy the row
+
+                latestWS.Rows(i).Copy Destination:=outputWSOwnership.Rows(lastRowOutput)
+
+                lastRowOutput = lastRowOutput + 1
+
+                hasOwnershipRecords = True
+
+            End If
+
+        End If
+
+    Next i
+
+   
+
+    ' Notify user about Ownership
+
+    If hasOwnershipRecords Then
+
+        MsgBox "Ownership ready", vbInformation
+
+    Else
+
+        MsgBox "No new Ownership", vbInformation
+
+    End If
+
+   
+
+    ' Save the output file if any records are found
+
+    If hasProbabilityRecords Or hasOwnershipRecords Then
+
+        outputWB.SaveAs outputFilePath
+
+    Else
+
+        outputWB.Close SaveChanges:=False
+
+    End If
+
+   
+
+    ' Clean up
+
+    latestFileWB.Close SaveChanges:=False
+
+    previousFileWB.Close SaveChanges:=False
+
+End Sub
+
+ 
