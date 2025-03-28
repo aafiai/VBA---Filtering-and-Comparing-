@@ -1,0 +1,161 @@
+Sub CompareAndGenerateNewFile()
+
+    Dim eventDetailsWB As Workbook
+
+    Dim verifiedListWB As Workbook
+
+    Dim newFileWB As Workbook
+
+    Dim eventDetailsWS As Worksheet
+
+    Dim verifiedListWS As Worksheet
+
+    Dim newWS As Worksheet
+
+    Dim lastRowEvent As Long
+
+    Dim lastRowVerified As Long
+
+    Dim lastRowNew As Long
+
+    Dim i As Long, j As Long
+
+    Dim isFound As Boolean
+
+    Dim todaysDate As String
+
+    Dim headerRow As Range
+
+   
+
+    ' Get today's date
+
+    todaysDate = Format(Date, "yyyy-mm-dd")
+
+   
+
+    ' Prompt user to open "Today's Event Details" file
+
+    MsgBox "Please provide today's Event Details file.", vbInformation
+
+    Application.Dialogs(xlDialogOpen).Show
+
+    Set eventDetailsWB = ActiveWorkbook
+
+    Set eventDetailsWS = eventDetailsWB.Sheets(1) ' Assuming the data is in the first sheet
+
+   
+
+    ' Filter rows in Event Details file
+
+    lastRowEvent = eventDetailsWS.Cells(eventDetailsWS.Rows.Count, "A").End(xlUp).Row
+
+   
+
+    ' Prompt user to open "Verified List" file
+
+    MsgBox "Please provide Verified List file.", vbInformation
+
+    Application.Dialogs(xlDialogOpen).Show
+
+    Set verifiedListWB = ActiveWorkbook
+
+    Set verifiedListWS = verifiedListWB.Sheets(1) ' Assuming the data is in the first sheet
+
+   
+
+    ' Get last row of Verified List
+
+    lastRowVerified = verifiedListWS.Cells(verifiedListWS.Rows.Count, "A").End(xlUp).Row
+
+   
+
+    ' Create a new workbook for output
+
+    Set newFileWB = Workbooks.Add
+
+    Set newWS = newFileWB.Sheets(1)
+
+    newWS.Name = "New FC PO Issued"
+
+   
+
+    ' Copy the header row from Event Details
+
+    Set headerRow = eventDetailsWS.Rows(1)
+
+    headerRow.Copy Destination:=newWS.Rows(1)
+
+    lastRowNew = 2 ' Start copying data from row 2 in the new file
+
+   
+
+    ' Loop through Event Details to find matching records
+
+    For i = 2 To lastRowEvent ' Assuming headers are in row 1
+
+        If eventDetailsWS.Cells(i, "AT").Value = "Yes" And _
+
+           eventDetailsWS.Cells(i, "V").Value = "None" And _
+
+           Year(eventDetailsWS.Cells(i, "Y").Value) = 2024 Then
+
+          
+
+           ' Check if Column A value exists in Verified List
+
+           isFound = False
+
+           For j = 2 To lastRowVerified
+
+               If eventDetailsWS.Cells(i, "A").Value = verifiedListWS.Cells(j, "A").Value Then
+
+                   isFound = True
+
+                   Exit For
+
+               End If
+
+           Next j
+
+          
+
+           ' If not found, copy the row to the new file
+
+           If Not isFound Then
+
+               eventDetailsWS.Rows(i).Copy Destination:=newWS.Rows(lastRowNew)
+
+               lastRowNew = lastRowNew + 1
+
+           End If
+
+        End If
+
+    Next i
+
+   
+
+    ' Save the new workbook with today's date in the name
+
+    Dim filePath As String
+
+    filePath = Application.DefaultFilePath & "\New FC PO Issued, Scope None - " & todaysDate & ".xlsx"
+
+    newFileWB.SaveAs filePath
+
+   
+
+    ' Notify the user
+
+    MsgBox "New file created: " & filePath, vbInformation
+
+   
+
+    ' Close the workbooks (optional)
+
+    eventDetailsWB.Close SaveChanges:=False
+
+    verifiedListWB.Close SaveChanges:=False
+
+End Sub
